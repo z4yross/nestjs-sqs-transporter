@@ -45,8 +45,8 @@ export class ClientSQS extends ClientProxy {
       try {
         queueUrl = await this.getQueueUrl(pattern);
       } catch (error) {
-        await this.createQueue(pattern);
-        queueUrl = await this.getQueueUrl(pattern);
+        this.logger.debug(`Queue ${pattern} not found, creating it...`);
+        queueUrl = await this.createQueue(pattern);
       }
 
       producer = Producer.create({
@@ -69,6 +69,8 @@ export class ClientSQS extends ClientProxy {
 
     const { QueueUrl } = await this.sqsClient.send(getQueueUrlCommand);
 
+    this.logger.debug(`Queue URL for ${pattern} is ${QueueUrl}`);
+
     return QueueUrl;
   }
 
@@ -81,7 +83,13 @@ export class ClientSQS extends ClientProxy {
       },
     });
 
-    await this.sqsClient.send(createQueueCommand);
+    const response = await this.sqsClient.send(createQueueCommand);
+
+    this.logger.debug(
+      `Creating queue ${pattern} with URL ${response.QueueUrl}`,
+    );
+
+    return response.QueueUrl;
   }
 
   public async connect() {
