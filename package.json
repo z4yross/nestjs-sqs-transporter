@@ -1,0 +1,41 @@
+{
+  "name": "nestjs-sqs-transporter",
+  "version": "0.0.1",
+  "description": "SQS Transporter for Nestjs",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "z4yross",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/z4yross/nestjs-sqs-transporter.git"
+  },
+  "scripts": {
+    "start": "ts-node index",
+    "build": "tsup",
+    "format": "prettier --write src/**/*.ts"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.3.8",
+    "@nestjs/core": "^10.3.8",
+    "@nestjs/microservices": "^10.3.8",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "sqs-consumer": "^9.1.0",
+    "sqs-producer": "^5.0.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.8",
+    "auto": "^11.1.6",
+    "cross-env": "^7.0.3",
+    "prettier": "^3.2.5",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5"
+  }
+}
