@@ -38,14 +38,10 @@ export class ClientSQS extends ClientProxy {
       this.producers.set(pattern, producer);
     }
 
-    try {
-      await producer.send({
-        id: uuidv4(),
-        body: JSON.stringify(packet.data),
-      });
-    } catch (err) {
-      this.logger.error(err);
-    }
+    return await producer.send({
+      id: uuidv4(),
+      body: JSON.stringify(packet.data),
+    });
   }
 
   public async connect() {
