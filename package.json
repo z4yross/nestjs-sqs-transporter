@@ -1,5 +1,5 @@
 {
-  "name": "nestjs-sqs-transporter",
+  "name": "nestjs-microservice-sqs-transport",
   "version": "0.0.1",
   "description": "SQS Transporter for Nestjs",
   "main": "./dist/index.js",
