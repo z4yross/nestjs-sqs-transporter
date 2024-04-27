@@ -25,7 +25,7 @@ export class ClientSQS extends ClientProxy {
     callback: (packet: WritePacket) => any,
   ): any {}
 
-  protected async dispatchEvent(packet: ReadPacket): Promise<any> {
+  async dispatchEvent(packet: ReadPacket): Promise<any> {
     const pattern = this.normalizePattern(packet.pattern);
 
     let producer = this.producers.get(pattern);
