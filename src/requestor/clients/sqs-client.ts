@@ -6,6 +6,8 @@ import { SQSOptions } from '../../interfaces/sqs-options.interface';
 import { v4 as uuidv4 } from 'uuid';
 import { Producer } from 'sqs-producer';
 
+import * as crypto from 'crypto';
+
 import {
   CreateQueueCommand,
   GetQueueUrlCommand,
@@ -63,8 +65,10 @@ export class ClientSQS extends ClientProxy {
   }
 
   async getQueueUrl(pattern: string) {
+    const md5Pattern = crypto.createHash('md5').update(pattern).digest('hex');
+
     const getQueueUrlCommand = new GetQueueUrlCommand({
-      QueueName: pattern,
+      QueueName: md5Pattern,
     });
 
     const { QueueUrl } = await this.sqsClient.send(getQueueUrlCommand);
@@ -75,8 +79,10 @@ export class ClientSQS extends ClientProxy {
   }
 
   async createQueue(pattern: string) {
+    const md5Pattern = crypto.createHash('md5').update(pattern).digest('hex');
+
     const createQueueCommand = new CreateQueueCommand({
-      QueueName: pattern,
+      QueueName: md5Pattern,
       Attributes: {
         VisibilityTimeout: '60',
         MessageRetentionPeriod: '1209600',
