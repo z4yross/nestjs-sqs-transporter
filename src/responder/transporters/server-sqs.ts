@@ -2,6 +2,7 @@ import {
   Server,
   CustomTransportStrategy,
   MessageHandler,
+  Transport,
 } from '@nestjs/microservices';
 
 import { SQSOptions } from '../../interfaces/sqs-options.interface';
@@ -11,14 +12,17 @@ import { Message } from 'sqs-producer';
 import { isObservable } from 'rxjs';
 import { Logger } from '@nestjs/common';
 import { AWSSQSClient } from '@utils/aws/sqs.client';
+import { SQS_TRANSPORTER } from '@consts';
 
 export class ServerSQS extends Server implements CustomTransportStrategy {
   private consumers: Map<string, Consumer>;
   private awsSqsClient: AWSSQSClient;
+  readonly transportId?: Transport | symbol;
 
   constructor(
     private readonly options: SQSOptions,
     protected readonly logger: Logger,
+    transportId?: Transport | symbol,
   ) {
     super();
 
@@ -27,6 +31,8 @@ export class ServerSQS extends Server implements CustomTransportStrategy {
 
     this.consumers = new Map<string, Consumer>();
     this.awsSqsClient = AWSSQSClient.getInstance();
+
+    this.transportId = transportId || SQS_TRANSPORTER;
   }
 
   public async listen(callback: () => void) {
