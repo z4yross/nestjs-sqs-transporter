@@ -8,7 +8,6 @@ import {
 import { SQSOptions } from '../../interfaces/sqs-options.interface';
 
 import { Consumer } from 'sqs-consumer';
-import { Message } from 'sqs-producer';
 import { isObservable } from 'rxjs';
 import { Logger } from '@nestjs/common';
 import { AWSSQSClient } from '@utils/aws/sqs.client';
@@ -72,10 +71,9 @@ export class ServerSQS extends Server implements CustomTransportStrategy {
     const app = Consumer.create({
       queueUrl: queueUrl,
 
-      handleMessage: async (data: unknown) => {
-        const message = data as Message;
-        this.logger.debug(`Received message from SQS: ${message.body}`);
-        const streamOrResult = await handler(message.body);
+      handleMessage: async (data: any) => {
+        this.logger.debug(`Received message from SQS: ${data.Body}`);
+        const streamOrResult = await handler(data.Body);
         if (isObservable(streamOrResult)) streamOrResult.subscribe();
       },
     });
