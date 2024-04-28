@@ -74,10 +74,7 @@ export class ServerSQS extends Server implements CustomTransportStrategy {
 
       handleMessage: async (data: unknown) => {
         const message = data as Message;
-        this.logger.debug(
-          `Received message from SQS: ${JSON.stringify(message)}`,
-        );
-        const streamOrResult = await handler(JSON.parse(message.body));
+        const streamOrResult = await handler(message.body);
         if (isObservable(streamOrResult)) streamOrResult.subscribe();
       },
     });
