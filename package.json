@@ -20,6 +20,7 @@
     "format": "prettier --write src/**/*.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-sqs": "^3.564.0",
     "@nestjs/common": "^10.3.8",
     "@nestjs/core": "^10.3.8",
     "@nestjs/microservices": "^10.3.8",
@@ -30,6 +31,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@types/node": "^20.12.7",
     "@types/uuid": "^9.0.8",
     "auto": "^11.1.6",
     "cross-env": "^7.0.3",

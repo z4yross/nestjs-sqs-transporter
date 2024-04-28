@@ -10,9 +10,11 @@ import { Consumer } from 'sqs-consumer';
 import { Message } from 'sqs-producer';
 import { isObservable } from 'rxjs';
 import { Logger } from '@nestjs/common';
+import { AWSSQSClient } from '@utils/aws/sqs.client';
 
 export class ServerSQS extends Server implements CustomTransportStrategy {
   private consumers: Map<string, Consumer>;
+  private awsSqsClient: AWSSQSClient;
 
   constructor(
     private readonly options: SQSOptions,
@@ -24,38 +26,45 @@ export class ServerSQS extends Server implements CustomTransportStrategy {
     this.initializeDeserializer(options);
 
     this.consumers = new Map<string, Consumer>();
+    this.awsSqsClient = AWSSQSClient.getInstance();
   }
 
-  public listen(callback: () => void) {
-    this.bindHandlers();
+  public async listen(callback: () => void) {
+    await this.bindHandlers();
     callback();
   }
 
-  public bindHandlers() {
-    this.messageHandlers.forEach((handler, queueName) =>
-      this.bindHandler(handler, queueName),
-    );
+  public async bindHandlers() {
+    for (const [queueName, handler] of this.messageHandlers) {
+      await this.bindHandler(handler, queueName);
+    }
   }
 
-  private bindHandler(
+  private async bindHandler(
     handler: MessageHandler<any, any, any>,
     queueName: string,
   ) {
     if (handler.isEventHandler)
-      return this.bindEventHandler(handler, queueName);
+      return await this.bindEventHandler(handler, queueName);
   }
 
-  private bindEventHandler(
+  private async bindEventHandler(
     handler: MessageHandler<any, any, any>,
     queueName: string,
   ) {
-    const { sqsUri, waitTimeSeconds } = this.options;
-
     if (this.consumers.has(queueName)) return;
 
+    let queueUrl: string;
+
+    try {
+      queueUrl = await this.awsSqsClient.getQueueUrl(queueName);
+    } catch (error) {
+      this.logger.debug(`Queue ${queueName} not found, creating it...`);
+      queueUrl = await this.awsSqsClient.createQueue(queueName);
+    }
+
     const app = Consumer.create({
-      queueUrl: `${sqsUri}/${queueName}`,
-      waitTimeSeconds: waitTimeSeconds ?? 0,
+      queueUrl: queueUrl,
 
       handleMessage: async (data: unknown) => {
         const message = data as Message;

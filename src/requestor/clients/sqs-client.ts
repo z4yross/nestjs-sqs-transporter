@@ -6,9 +6,12 @@ import { SQSOptions } from '../../interfaces/sqs-options.interface';
 import { v4 as uuidv4 } from 'uuid';
 import { Producer } from 'sqs-producer';
 
+import { AWSSQSClient } from '@utils/aws/sqs.client';
+
 export class ClientSQS extends ClientProxy {
   protected readonly logger: Logger;
   protected producers: Map<string, Producer>;
+  protected awsSqsClient: AWSSQSClient;
 
   constructor(protected readonly options: SQSOptions) {
     super();
@@ -31,8 +34,17 @@ export class ClientSQS extends ClientProxy {
     let producer = this.producers.get(pattern);
 
     if (!producer) {
+      let queueUrl: string;
+
+      try {
+        queueUrl = await this.awsSqsClient.getQueueUrl(pattern);
+      } catch (error) {
+        this.logger.debug(`Queue ${pattern} not found, creating it...`);
+        queueUrl = await this.awsSqsClient.createQueue(pattern);
+      }
+
       producer = Producer.create({
-        queueUrl: `${this.options.sqsUri}/${pattern}`,
+        queueUrl: queueUrl,
       });
 
       this.producers.set(pattern, producer);
@@ -45,10 +57,11 @@ export class ClientSQS extends ClientProxy {
   }
 
   public async connect() {
-    const { sqsUri, region } = this.options;
+    const { sqsUri } = this.options;
 
     if (!sqsUri) throw new Error('Unable to init AWS SQS, missing sqsUri');
-    if (!region) throw new Error('Unable to init AWS SQS, missing region');
+
+    this.awsSqsClient = AWSSQSClient.getInstance();
   }
 
   public close() {
